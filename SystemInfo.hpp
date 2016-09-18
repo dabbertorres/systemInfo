@@ -14,7 +14,7 @@
 #ifdef __linux__
 	#include <GL/gl.h>
 #elif _WIN32
-	#include <GL/glew.h>
+	#include <GL/gl.h>
 #endif
 
 namespace swift
