@@ -1,5 +1,4 @@
 #include <string>
-#include <GLFW/glfw3.h>
 namespace dbr
 {
 	namespace sys
@@ -29,6 +28,9 @@ namespace dbr
 
 			// driver version
 			std::string driver();
+		}
+		namespace utils {
+			std::string GetSystemVersion();
 		}
 	}
 }
