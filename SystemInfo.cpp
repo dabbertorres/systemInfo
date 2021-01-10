@@ -135,7 +135,7 @@ namespace dbr
 				OSVERSIONINFOEX osvi;
 				ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 				osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-				GetVersionEx(reinterpret_cast<OSVERSIONINFO*>(&osvi));
+				//GetVersionEx(reinterpret_cast<OSVERSIONINFO*>(&osvi));
 
 				std::ostringstream oss;
 				oss << osvi.dwMajorVersion << '.' << osvi.dwMinorVersion << '.' + osvi.dwBuildNumber;
