@@ -5,6 +5,8 @@ namespace dbr
 	{
 		// total RAM in MiB
 		std::uint64_t totalRAM();
+		// available memmory in MiB
+		std::uint64_t availRAM();
 
 		// friendly name of CPU
 		std::string cpuModel();
@@ -34,3 +36,19 @@ namespace dbr
 		}
 	}
 }
+
+class SystemInfo {
+public:
+	std::string getSystemInfoString();
+	SystemInfo();
+
+private:
+	uint64_t totalRAM;
+	std::string cpuModel;
+	std::string OSName;
+	std::string OSVersion;
+	std::string Arch;
+	std::string Vendor;
+	std::string GCName;//graphics card name
+	std::string DriverString;
+};

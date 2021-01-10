@@ -5,6 +5,7 @@
 #ifdef __linux__
 	#include <sys/utsname.h>
 	#include <unistd.h>
+	#include <stdio.h>
 #elif _WIN32
 	/*	If defined, the following flags inhibit definition
 	 *	of the indicated items.
@@ -77,6 +78,24 @@ namespace dbr
 			// convert to MiB from B
 			return statex.ullTotalPhys / (1024 * 1024);
 #elif _OSX
+#endif
+		}
+		std::uint64_t availRAM() {
+#ifdef __linux__
+			//Linux memory calculus like (total - free - buffer - cache) / total
+			//String needing to fill
+			FILE* t = fopen("/proc/meminfo" , "r+");
+#elif _WIN32
+			MEMORYSTATUSEX statex;
+
+			statex.dwLength = sizeof(statex);
+
+			GlobalMemoryStatusEx(&statex);
+
+			return statex.ullAvailPhys>>20;//right shift by 20 bits means divided by (1024*1024)
+
+#elif _OSX
+
 #endif
 		}
 
