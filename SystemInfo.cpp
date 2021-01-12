@@ -6,6 +6,8 @@
 	#include <sys/utsname.h>
 	#include <unistd.h>
 	#include <stdio.h>
+	#include <GL/gl.h>
+
 #elif _WIN32
 	/*	If defined, the following flags inhibit definition
 	 *	of the indicated items.
@@ -52,11 +54,18 @@
 	#define NODEFERWINDOWPOS	// DeferWindowPos routines
 	#define NOMCX				// Modem Configuration Extension
 	#include <windows.h>
+	#include <GL/gl.h>
+	/* Failing to resolve Problem that glGetString
+	#include <GL/glut.h>
+	#include <stdlib.h>
+	#include <string.h>
+	function always invokes a unusablet memory */
 #elif _OSX
+	#include <GL/gl.h>
 	// some OSX header
 #endif
 
-#include <GL/gl.h>
+
 
 namespace dbr
 {
@@ -85,6 +94,7 @@ namespace dbr
 			//Linux memory calculus like (total - free - buffer - cache) / total
 			//String needing to fill
 			FILE* t = fopen("/proc/meminfo" , "r+");
+			return 0;
 #elif _WIN32
 			MEMORYSTATUSEX statex;
 
@@ -172,7 +182,34 @@ namespace dbr
 				SYSTEM_INFO sysInfo;
 				GetNativeSystemInfo(&sysInfo);
 
-				return std::to_string(sysInfo.wProcessorArchitecture);
+				std::string t;
+
+				switch (sysInfo.wProcessorArchitecture)
+				{
+				case PROCESSOR_ARCHITECTURE_AMD64:
+					t = "x64 (AMD or Intel), amd64, x86_64";
+					break;
+				case PROCESSOR_ARCHITECTURE_ARM:
+					t = "ARM, aarch32";
+					break;
+				case PROCESSOR_ARCHITECTURE_ARM64:
+					t = "ARM64, aarch64";
+					break;
+				case PROCESSOR_ARCHITECTURE_IA64:
+					t = "IA64, Intel Itanium-based 64";
+					break;
+				case PROCESSOR_ARCHITECTURE_INTEL:
+					t = "x86, i386, i486, i586, i686";
+					break;
+				case PROCESSOR_ARCHITECTURE_UNKNOWN:
+					"Unknown Arch, is Running in Windows PE?";
+					break;
+				
+				default:
+					t = "Unknown Arch, is Running in Windows PE?";
+					break;
+			}
+				return t;
 #elif _OSX
 	// get OSX info
 #endif
@@ -180,7 +217,7 @@ namespace dbr
 		}
 
 		namespace video
-		{
+		{/*
 			std::string vendor()
 			{
 				return reinterpret_cast<const char*>(glGetString(GL_VENDOR));
@@ -195,6 +232,12 @@ namespace dbr
 			{
 				return reinterpret_cast<const char*>(glGetString(GL_VERSION));
 			}
+		*/
+			std::string vendor() { return "Generic Graphis Vendor "; }
+
+			std::string name  () { return "Generic Graphis Card   "; }
+
+			std::string driver() { return "Generic Graphis Driver "; }
 		}
 		namespace utils {
 #if _WIN32_WINNT > 0x0602 
@@ -206,31 +249,34 @@ namespace dbr
 				typedef void(__stdcall* NTPROC)(DWORD*, DWORD*, DWORD*);
 				HINSTANCE hinst = LoadLibraryA("ntdll.dll");
 				DWORD dwMajor, dwMinor, dwBuildNumber;
-				NTPROC proc = (NTPROC)GetProcAddress(hinst, "RtlGetNtVersionNumbers");
-				proc(&dwMajor, &dwMinor, &dwBuildNumber);
-				if (dwMajor == 6 && dwMinor == 3)//win 8.1
-				{
-					if (dwBuildNumber == 4026541440)//WinServer2012R2的BuildNumber号
+				if (hinst != 0) {
+					NTPROC proc = (NTPROC)GetProcAddress(hinst, "RtlGetNtVersionNumbers");
+					proc(&dwMajor, &dwMinor, &dwBuildNumber);
+					if (dwMajor == 6 && dwMinor == 3)//win 8.1
 					{
-						strOSVersion = "Microsoft Windows Server 2012 R2";
+						if (dwBuildNumber == 4026541440)//WinServer2012R2的BuildNumber号
+						{
+							strOSVersion = "Microsoft Windows Server 2012 R2";
+						}
+						else
+						{
+							strOSVersion = "Microsoft Windows 8.1";
+						}
 					}
-					else
+					else if (dwMajor == 10 && dwMinor == 0)//win 10
 					{
-						strOSVersion = "Microsoft Windows 8.1";
+						if (dwBuildNumber == 4026546233)//Win10的BuildNumber号
+						{
+							strOSVersion = "Microsoft Windows 10";
+						}
+						else
+						{
+							strOSVersion = "Microsoft Windows Server 2016";
+						}
 					}
+					return(strOSVersion);
 				}
-				else if (dwMajor == 10 && dwMinor == 0)//win 10
-				{
-					if (dwBuildNumber == 4026546233)//Win10的BuildNumber号
-					{
-						strOSVersion = "Microsoft Windows 10";
-					}
-					else
-					{
-						strOSVersion = "Microsoft Windows Server 2016";
-					}
-				}
-				return(strOSVersion);
+				else return "Excution Failed, is running in Windows PE?";
 			}
 #else
 #include <WinUser.h>
@@ -319,4 +365,31 @@ namespace dbr
 #endif
 		}
 	}
+}
+
+
+SystemInfo::SystemInfo() {
+	totalRAM		= dbr::sys::totalRAM();
+	availRAM		= dbr::sys::availRAM();
+	cpuModel		= dbr::sys::cpuModel();
+	OSName			= dbr::sys::os::name();
+	OSVersion		= dbr::sys::os::version();
+	Arch			= dbr::sys::os::architecture();
+	Vendor			= dbr::sys::video::vendor();
+	GCName			= dbr::sys::video::name();//graphics card name
+	DriverString	= dbr::sys::video::driver();
+}
+
+std::string SystemInfo::getSystemInfoString() {
+	std::string n = "\n";
+	std::string t = 
+		  std::string("CPU Model: ") + cpuModel + n
+		+ std::string("CPU  Arch: ") + Arch + n 
+		+ std::string("Graphis C: ") + GCName + n
+		+ std::string("OS   Name: ") + OSName + n 
+		+ std::string("OSVersion: ") + OSVersion + n
+		+ std::string("DriverStr: ") + DriverString + n
+		+ std::string("Total Mem: ") + std::to_string(totalRAM) + n 
+		+ std::string("Avail Mem: ") + std::to_string(availRAM) + n;
+	return t;
 }

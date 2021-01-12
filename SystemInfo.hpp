@@ -42,13 +42,13 @@ public:
 	std::string getSystemInfoString();
 	SystemInfo();
 
-private:
-	uint64_t totalRAM;
-	std::string cpuModel;
-	std::string OSName;
-	std::string OSVersion;
-	std::string Arch;
-	std::string Vendor;
-	std::string GCName;//graphics card name
-	std::string DriverString;
+	uint64_t		totalRAM;
+	uint64_t		availRAM;
+	std::string		cpuModel;
+	std::string		OSName;
+	std::string		OSVersion;
+	std::string		Arch;
+	std::string		Vendor;
+	std::string		GCName;//graphics card name
+	std::string		DriverString;
 };
