@@ -1,11 +1,12 @@
 #include <string>
-
 namespace dbr
 {
 	namespace sys
 	{
 		// total RAM in MiB
 		std::uint64_t totalRAM();
+		// available memmory in MiB
+		std::uint64_t availRAM();
 
 		// friendly name of CPU
 		std::string cpuModel();
@@ -30,5 +31,24 @@ namespace dbr
 			// driver version
 			std::string driver();
 		}
+		namespace utils {
+			std::string GetSystemVersion();
+		}
 	}
 }
+
+class SystemInfo {
+public:
+	std::string getSystemInfoString();
+	SystemInfo();
+
+	uint64_t		totalRAM;
+	uint64_t		availRAM;
+	std::string		cpuModel;
+	std::string		OSName;
+	std::string		OSVersion;
+	std::string		Arch;
+	std::string		Vendor;
+	std::string		GCName;//graphics card name
+	std::string		DriverString;
+};
